@@ -41,9 +41,9 @@
 
    
     function generateRandomNumber() {
-      if (M.length === 0) return 0; // Caso especial para evitar erros
-      let seed = M.reduce((acc, val) => acc ^ val, 0); // Combinar dados do mouse em uma única semente
-      return (Math.abs(seed) & 0xFF); // Gera um número aleatório entre 0 e 255
+      if (M.length === 0) return 0;
+      let seed = M.reduce((acc, val) => acc ^ val, 0); 
+      return (Math.abs(seed) & 0xFF); 
     }
 
 
@@ -56,14 +56,14 @@
             M.shift;
         } else {
            if (capture_mouse_pos){
-             M.push((e.clientX + e.clientY + timeStamp) & 0xff); // Limit 255
+             M.push((e.clientX + e.clientY + timeStamp) & 0xff);
            }
         }
     });
 
 
    function toHex(d) {
-      let S = d.toString(16);//.toUpperCase();
+      let S = d.toString(16);
       if (S.length < 2) S = "0" + S;
       return S;
    }
@@ -111,7 +111,7 @@
         }
     }
 
-    setInterval(Calculate, 100);//in ms
+    setInterval(Calculate, 100);
 
   </script>
 </body>
