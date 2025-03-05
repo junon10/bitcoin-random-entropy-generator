@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bitcoin Random Entropy Generator</title>
+</head>
+<body>
+  <h2>Bitcoin Random Entropy Generator</h2>
+  <p>Version: 1.0.0.2</p>
+  <p>Date: 2024/12/27</p>
+  <p>Author: Junon M.</p>
+  <p id="msgs"></p>  
+  <p id="output">Move the mouse to generate the necessary entropy...</p>
+    
+  <script>
+
+    const DEBUG = false;
+
+    const total_captures = 200;
+    const total_seed_bytes = 32; // 32 bytes (256 bits)
+
+    var M = [];
+    var FinalSeed = [];
+    var capture_mouse_pos = true;   
+    var stop = false;
+    
+
+    function StatusMsg() {
+      let S = "";      
+      let bits_value = total_seed_bytes * 8;
+      let percent_value = FinalSeed.length * (100 / total_seed_bytes);
+      S += "Progress: " + percent_value.toFixed(0) + "% de " + bits_value + " bits";
+      S += "\n";
+      if (DEBUG){
+        S += "\nMouse position Array + Current Date Time: \n" + M.join(", ");
+        S += "\n";
+      }
+      return S;
+    }
+
+   
+    function generateRandomNumber() {
+      if (M.length === 0) return 0; // Caso especial para evitar erros
+      let seed = M.reduce((acc, val) => acc ^ val, 0); // Combinar dados do mouse em uma única semente
+      return (Math.abs(seed) & 0xFF); // Gera um número aleatório entre 0 e 255
+    }
+
+
+    document.addEventListener("mousemove", (e) => { 
+        
+        const timeStamp = Date.now(); 
+        
+        if (M.length > total_captures) {
+            // Memory Limit
+            M.shift;
+        } else {
+           if (capture_mouse_pos){
+             M.push((e.clientX + e.clientY + timeStamp) & 0xff); // Limit 255
+           }
+        }
+    });
+
+
+   function toHex(d) {
+      let S = d.toString(16);//.toUpperCase();
+      if (S.length < 2) S = "0" + S;
+      return S;
+   }
+
+   function getHexSeed(){
+      let S = "";
+      for (let i = 0; i < FinalSeed.length; i++) S += toHex(FinalSeed[i]);
+      return S;
+   }
+
+   function getBytesHexSeed(){
+      let S = "";
+      for (let i = 0; i < FinalSeed.length; i++){ 
+        S += "0x" + toHex(FinalSeed[i]);
+        if (i != FinalSeed.length - 1) S += ", ";
+      }
+      return S;
+   }
+
+
+   function Calculate(){
+
+         if (FinalSeed.length < total_seed_bytes) {
+    
+            if (M.length >= total_captures) {
+              capture_mouse_pos = false;
+              FinalSeed.push(generateRandomNumber());
+              M.shift(0, M.length);
+              capture_mouse_pos = true;
+            }
+
+            document.getElementById('msgs').innerText = StatusMsg();
+
+        } else {
+           
+            if (stop === false)
+            {
+               stop = true;
+               document.getElementById('msgs').innerText = StatusMsg();
+               document.getElementById('output').innerText = 
+               "Random Seed in HEX " + total_seed_bytes + " bytes:\n" + getBytesHexSeed() + "\n\n" + 
+               "Random Seed in HEX " + (total_seed_bytes * 8) + " bits:\n" + getHexSeed();
+               FinalSeed.shift(0, FinalSeed.length);
+            }
+        }
+    }
+
+    setInterval(Calculate, 100);//in ms
+
+  </script>
+</body>
+</html>
